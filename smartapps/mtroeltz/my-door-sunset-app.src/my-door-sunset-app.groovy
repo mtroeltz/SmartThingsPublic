@@ -52,6 +52,7 @@ def updated() {
 	unsubscribe()
 	unschedule()
 	initialize()
+    sendNotificationEvent("$app.name: settings updated")
 }
 
 def initialize() {
@@ -59,6 +60,7 @@ def initialize() {
 		subscribe(location, "position", locationPositionChange)
 		subscribe(location, "sunriseTime", sunriseSunsetTimeHandler)
 		subscribe(location, "sunsetTime", sunriseSunsetTimeHandler)
+        sendNotificationEvent("$app.name: calling astrocheck from initialize")
 		astroCheck()
         subscribe(openCloseSensor, "contact.open", contactHandler)
 }
@@ -70,7 +72,8 @@ def locationPositionChange(evt) {
 
 def sunriseSunsetTimeHandler(evt) {
 	state.lastSunriseSunsetEvent = now()
-	log.debug "SmartNightlight.sunriseSunsetTimeHandler($app.id)"
+	log.debug "$app.name: sunriseSunsetTimeHandler"
+    sendNotificationEvent("$app.name: calling astrocheck from sunriseSunsetTimeHandler")
 	astroCheck()
 }
 

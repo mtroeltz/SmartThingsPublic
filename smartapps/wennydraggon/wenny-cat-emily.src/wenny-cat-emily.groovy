@@ -53,6 +53,8 @@ def initialize() {
     log.debug "initialize in wenny cat emily"
     subscribe(themotion, "motion.active", motionDetectedHandler)
     subscribe(themotion, "motion.inactive", motionStoppedHandler)
+    findMyCaps(themotion)
+    findMyCaps(theswitch)
 }   
 
 // TODO: implement event handlers
@@ -68,4 +70,18 @@ def motionStoppedHandler(evt) {
     log.info "switch is off"
 }
 
+def findMyCaps(acap) {
+
+	log.debug "findMyCaps starting..."
+def myCaps = acap.capabilities
+
+// log each capability supported by the "mySwitch" device, along
+// with all its supported attributes
+myCaps.each {cap ->
+    log.debug "Capability name: ${cap.name}"
+    cap.attributes.each {attr ->
+        log.debug "-- Attribute name; ${attr.name}"
+    }
+}
+}
 
