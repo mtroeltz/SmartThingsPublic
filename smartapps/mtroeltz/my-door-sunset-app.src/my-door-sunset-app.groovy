@@ -63,6 +63,7 @@ def initialize() {
         sendNotificationEvent("$app.name: calling astrocheck from initialize")
 		astroCheck()
         subscribe(openCloseSensor, "contact.open", contactHandler)
+        state.lastSunriseSunsetEvent = now()
 }
 
 def locationPositionChange(evt) {
@@ -83,7 +84,7 @@ def astroCheck() {
 	def s = getSunriseAndSunset(zipCode: zipCode, sunriseOffset: sunriseOffset, sunsetOffset: sunsetOffset)
 	state.riseTime = s.sunrise.time
 	state.setTime = s.sunset.time
-	log.debug "rise: ${new Date(state.riseTime)}($state.riseTime), set: ${new Date(state.setTime)}($state.setTime)"
+	sendNotificationEvent("rise: ${new Date(state.riseTime)}($state.riseTime),\n set: ${new Date(state.setTime)}($state.setTime),\nnow: ${new Date(now())}")
 }
 
 def contactHandler(evt) {
@@ -103,13 +104,18 @@ private enabled() {
     log.debug "enabled: checking time"
     def t = now()
     result = t < state.riseTime || t > state.setTime
-        if ( t < state.riseTime) {
-        	log.debug "less rise: $t < $state.riseTime"
+        
+        // Have we missed an event?
+        def oneDay = 24*60*60*1000
+        //log.debug("before")
+        def yesterday = state.riseTime - oneDay
+        log.debug("after last: ${new Date(state.lastSunriseSunsetEvent)} ($state.lastSunriseSunsetEvent)\n yesterday: ${new Date(yesterday)} ($yesterday)")
+        if (state.lastSunriseSunsetEvent < yesterday) {
+          sendNotificationEvent("$app.name: sunrise bad:\n now: ${new Date(now())} (${now()})\n last: ${new Date(state.lastSunriseSunsetEvent)} ($state.lastSunriseSunsetEvent)")
+        } else {
+          sendNotificationEvent("$app.name: sunrise ok:\n now: ${new Date(now())} (${now()})\n last: ${new Date(state.lastSunriseSunsetEvent)} ($state.lastSunriseSunsetEvent)")
         }
-        if ( t > state.setTime) {
-        	log.debug "greater set: $t > $state.setTime"
-        }
-        log.debug "enabled: $result"
+      log.debug("after notify")        
 
 	result
 }
