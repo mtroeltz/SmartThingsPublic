@@ -126,17 +126,21 @@ private enabled() {
 	def result
     def fakeswitch = vswitch.currentValue("switch")
     log.debug "$app.name: $vswitch.label: $fakeswitch"
-    def fakevalue = 0
+    def fakevalue = false
     if (fakeswitch == "on"){
-       fakevalue = 1
+       fakevalue = true
     } else {
-       fakevalue = 0
+       fakevalue = false
     }
-    sendNotificationEvent("$app.name: $vswitch.label: $fakeswitch: $fakevalue")
     
 	def t = now()
-	result = (t < state.riseTime || t > state.setTime) && $fakevalue
+	result = t < state.riseTime || t > state.setTime
 	log.debug "now: ${new Date(t)} ($t) and result: $result"
+    sendNotificationEvent("$app.name: before $result")
+    
+    result = result && fakevalue
+    sendNotificationEvent("$app.name: $vswitch.label: $fakeswitch: $fakevalue with result: $result")
+    
 	result
 }
 
